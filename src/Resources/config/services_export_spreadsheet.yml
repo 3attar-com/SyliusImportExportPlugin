@@ -18,16 +18,6 @@ services:
         tags:
             - { name: sylius.exporter, type: sylius.country, format: xlsx }
 
-    sylius.exporter.orders.xlsx:
-        class: FriendsOfSylius\SyliusImportExportPlugin\Exporter\ResourceExporter
-        arguments:
-            - "@sylius.exporter.spreadsheet_writer"
-            - "@sylius.exporter.pluginpool.orders"
-            - ["Number", "State", "Product_list" , "Total" ,  "Currency_code", "Checkout_completed_at", "Checkout_state", "Payment_state", "Shipping_state", "Token_value", "Gender", "Full_name", "Email", "Telephone", "Shipping_address", "Billing_address" , "Customer_ip", "Notes"]
-            - "@sylius.exporters_transformer_pool"
-        tags:
-            - { name: sylius.exporter, type: sylius.order, format: xlsx }
-
     sylius.exporter.customers.xlsx:
         class: FriendsOfSylius\SyliusImportExportPlugin\Exporter\ResourceExporter
         arguments:
@@ -38,7 +28,7 @@ services:
         tags:
             - { name: sylius.exporter, type: sylius.customer, format: xlsx }
 
-     sylius.exporter.orders.xlsx:
+    sylius.exporter.orders.xlsx:
         class: FriendsOfSylius\SyliusImportExportPlugin\Exporter\OrderResourceExporter
         arguments:
             - "@sylius.exporter.spreadsheet_writer"
