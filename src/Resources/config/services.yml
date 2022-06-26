@@ -95,7 +95,7 @@ services:
     sylius.exporters_transformer_integer_money_format:
         class: FriendsOfSylius\SyliusImportExportPlugin\Exporter\Transformer\Handler\IntegerToMoneyFormatHandler
         arguments:
-            - ['Total']
+            - ['Total_After_Discount' , 'Order_Total' , 'Item_Price' , 'Shipping_Total' , 'Item_Total']
         tags:
             - { name: sylius.exporter_transformer }
 
