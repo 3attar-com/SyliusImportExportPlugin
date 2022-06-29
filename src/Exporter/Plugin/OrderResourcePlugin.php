@@ -4,13 +4,21 @@ declare(strict_types=1);
 
 namespace FriendsOfSylius\SyliusImportExportPlugin\Exporter\Plugin;
 
+use App\Entity\Addressing\Address;
+use App\Entity\Customer\Customer;
+use App\Entity\Product\Product;
+use App\Entity\Promotion\Promotion;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityNotFoundException;
+use Doctrine\ORM\ORMException;
 use FriendsOfSylius\SyliusImportExportPlugin\Exporter\ORM\Hydrator\HydratorInterface;
 use FriendsOfSylius\SyliusImportExportPlugin\Service\AddressConcatenationInterface;
 use Sylius\Component\Core\Model\OrderInterface;
 use Sylius\Component\Core\Model\OrderItemInterface;
+use Sylius\Component\Core\Model\PromotionCoupon;
 use Sylius\Component\Product\Model\ProductInterface;
 use Sylius\Component\Product\Model\ProductVariantInterface;
+use Sylius\Component\Promotion\Model\PromotionCouponInterface;
 use Sylius\Component\Resource\Model\ResourceInterface;
 use Sylius\Component\Resource\Repository\RepositoryInterface;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
@@ -22,6 +30,9 @@ class OrderResourcePlugin extends ResourcePlugin
 
     /** @var HydratorInterface */
     private $orderHydrator;
+
+    /** @var EntityManagerInterface */
+    protected $entityManager;
 
     public function __construct(
         RepositoryInterface           $repository,
@@ -35,6 +46,8 @@ class OrderResourcePlugin extends ResourcePlugin
 
         $this->addressConcatenation = $addressConcatenation;
         $this->orderHydrator = $orderHydrator;
+        $this->entityManager = $entityManager;
+
     }
 
     /**
@@ -52,25 +65,28 @@ class OrderResourcePlugin extends ResourcePlugin
             $items = $this->getItemsAndCount($resource);
             foreach ($items as $item) {
 
+
                 $this->addPromotionAndPromotionCouponerData($item, (string)$resource->getId());
 
-                $this->addGeneralData($item, (string)$resource->getId(), (string)$item->getId());
+                  $this->addGeneralData($item, (string)$resource->getId(), (string)$item->getId());
 
                 // insert customer information to specific fields
-                $this->addCustomerData($item, (string)$item->getId(), (string)$resource->getId());
+                   $this->addCustomerData($item, (string)$item->getId(), (string)$resource->getId());
 
                 // insert shippingaddress to the specific field
-                $this->addShippingAddressData($item, (string)$item->getId(), (string)$resource->getId());
+                 $this->addShippingAddressData($item, (string)$item->getId(), (string)$resource->getId());
 
                 // insert billingaddress to the specific field
-                $this->addBillingAddressData($item, (string)$item->getId(), (string)$resource->getId());
+                  $this->addBillingAddressData($item, (string)$item->getId(), (string)$resource->getId());
 
                 $this->addOrderItemData($item);
+
 
             }
         }
     }
-    protected  function  addDataForCustomResource($resource,$field)
+
+    protected function addDataForCustomResource($resource, $field)
     {
         foreach ($resource->getItems() as $item) {
             $this->addDataForResource(
@@ -81,24 +97,32 @@ class OrderResourcePlugin extends ResourcePlugin
             );
         }
     }
+
     private function addPromotionAndPromotionCouponerData(OrderItemInterface $resource, $id): void
     {
-        $promo = $resource->getOrder()->getPromotionCoupon();
-        if (!is_null($promo)) {
-            $this->addDataForResource($resource, 'Promotion_ID', $promo->getPromotion()->getId());
-            $this->addDataForResource($resource, 'Promotion_Name', $promo->getPromotion()->getName());
-            $this->addDataForResource($resource, 'Promotion_Description', $promo->getPromotion()->getDescription());
-            $this->addDataForResource($resource, 'Promotion_Coupon_ID', $promo->getId());
-            $this->addDataForResource($resource, 'Promotion_Coupon_Name', $promo->getCode());
+
+        $order = $this->getOrder($resource);
+
+        if (count($order->getPromotions()) > 0) {
+            $this->addDataForResource($resource, 'Promotion_ID', $order->getPromotions()->first()->getId());
+            $this->addDataForResource($resource, 'Promotion_Name', $order->getPromotions()->first()->getName());
+            $this->addDataForResource($resource, 'Promotion_Description', $order->getPromotions()->first()->getDescription());
         }
+
+        if ($order->getPromotionCoupon()->getId() != null && $this->isExist(\App\Entity\Promotion\PromotionCoupon::class, $order->getPromotionCoupon())) {
+            $this->addDataForResource($resource, 'Promotion_Coupon_ID', $order->getPromotionCoupon()->getId());
+            $this->addDataForResource($resource, 'Promotion_Coupon_Name', $order->getPromotionCoupon()->getCode());
+        }
+
     }
 
     private function addGeneralData(OrderItemInterface $resource, $id): void
     {
+
         $order = $this->getOrder($resource);
 
         $this->addDataForResource($resource, 'Order_Total', $order->getTotal());
-        $this->addDataForResource($resource, 'Total_After_Discount', $order->getOrderPromotionTotal());
+        $this->addDataForResource($resource, 'Total_After_Discount', $order->getOrderPromotionTotal() < 0 ? $order->getOrderPromotionTotal() * -1 : $order->getOrderPromotionTotal());
         $this->addDataForResource($resource, 'Order_created_Date', $order->getCreatedAt());
         $this->addDataForResource($resource, 'Order_updated_Date', $order->getUpdatedAt());
         $this->addDataForResource($resource, 'Shipping_Total', $order->getAdjustmentsTotal());
@@ -117,31 +141,32 @@ class OrderResourcePlugin extends ResourcePlugin
         $order = $this->getOrder($resource);
         $customer = $order->getCustomer();
 
-        if (null === $customer) {
-            return;
+        if ($customer->getId() != null && $this->isExist(Customer::class,$customer)) {
+            $this->addDataForResource($resource, 'Gender', $customer->getGender());
+            $this->addDataForResource($resource, 'Full_name', $customer->getFullName());
+            $this->addDataForResource($resource, 'Telephone', $customer->getPhoneNumber());
+            $this->addDataForResource($resource, 'Email', $customer->getEmail());
+            $this->addDataForResource($resource, 'Customer_Id', $customer->getId());
         }
-        $this->addDataForResource($resource, 'Gender', $customer->getGender());
-        $this->addDataForResource($resource, 'Full_name', $customer->getFullName());
-        $this->addDataForResource($resource, 'Telephone', $customer->getPhoneNumber());
-        $this->addDataForResource($resource, 'Email', $customer->getEmail());
-        $this->addDataForResource($resource, 'Customer_Id', $customer->getId());
+
     }
 
     private function addShippingAddressData(OrderItemInterface $resource, $id): void
     {
         $order = $this->getOrder($resource);
         $shippingAddress = $order->getShippingAddress();
-        if (null === $shippingAddress) {
-            return;
+
+        if ($shippingAddress->getId()!=null && $this->isExist(  Address::class, $shippingAddress)) {
+            $shippingInfoString = $this->addressConcatenation->getString($shippingAddress);
+            $this->addDataForResource($resource, 'provinceCode', $shippingAddress->getProvinceCode());
+            $this->addDataForResource($resource, 'provinceName', $shippingAddress->getProvinceName());
+            $this->addDataForResource($resource, 'Address_Street', $shippingAddress->getStreet());
+            $this->addDataForResource($resource, 'Shipping_address', $shippingInfoString);
+            $this->addDataForResource($resource, 'First_Name', $shippingAddress->getFirstName());
+            $this->addDataForResource($resource, 'Last_Name', $shippingAddress->getLastName());
+            $this->addDataForResource($resource, 'Phone_Number', $shippingAddress->getPhoneNumber());
         }
-        $shippingInfoString = $this->addressConcatenation->getString($shippingAddress);
-        $this->addDataForResource($resource, 'provinceCode', $shippingAddress->getProvinceCode());
-        $this->addDataForResource($resource, 'provinceName', $shippingAddress->getProvinceName());
-        $this->addDataForResource($resource, 'Address_Street', $shippingAddress->getStreet());
-        $this->addDataForResource($resource, 'Shipping_address', $shippingInfoString);
-        $this->addDataForResource($resource, 'First_Name', $shippingAddress->getFirstName());
-        $this->addDataForResource($resource, 'Last_Name', $shippingAddress->getLastName());
-        $this->addDataForResource($resource, 'Phone_Number', $shippingAddress->getPhoneNumber());
+
     }
 
     private function addBillingAddressData(OrderItemInterface $resource, $id): void
@@ -149,11 +174,10 @@ class OrderResourcePlugin extends ResourcePlugin
         $order = $this->getOrder($resource);
         $billingAddress = $order->getBillingAddress();
 
-        if (null === $billingAddress) {
-            return;
+        if ($billingAddress->getId()!=null && $this->isExist(  Address::class, $billingAddress)) {
+            $billingInfoString = $this->addressConcatenation->getString($billingAddress);
+            $this->addDataForResource($resource, 'Billing_address', $billingInfoString);
         }
-        $billingInfoString = $this->addressConcatenation->getString($billingAddress);
-        $this->addDataForResource($resource, 'Billing_address', $billingInfoString);
     }
 
     private function getItemsAndCount(OrderInterface $resource): array
@@ -171,13 +195,16 @@ class OrderResourcePlugin extends ResourcePlugin
     {
         $variant = $resource->getVariant();
         $product = $variant->getProduct();
-        $this->addDataForResource($resource, 'Item_Total', $resource->getTotal());
-        $this->addDataForResource($resource, 'Item_Price', $resource->getUnitPrice());
-        $this->addDataForResource($resource, 'Item_Quantity', $resource->getQuantity());
-        $this->addDataForResource($resource, 'Product', $resource->getProductName());
-        $this->addDataForResource($resource, 'Vendor_Id', !is_null($product->getVendor()) ? $product->getVendor()->getId() : '');
-        $this->addDataForResource($resource, 'Vendor_Name', !is_null($product->getVendor()) ? $product->getVendor()->getName() : '');
-        $this->addDataForResource($resource, 'Vendor_Email', !is_null($product->getVendor()) ? $product->getVendor()->getEmail() : '');
+        if ($product->getId()!=null && $this->isExist(  Product::class, $product)) {
+            $this->addDataForResource($resource, 'Item_Total', $resource->getTotal());
+            $this->addDataForResource($resource, 'Item_Price', $resource->getUnitPrice());
+            $this->addDataForResource($resource, 'Item_Quantity', $resource->getQuantity());
+            $this->addDataForResource($resource, 'Product', $resource->getProductName());
+            $this->addDataForResource($resource, 'Vendor_Id', !is_null($product->getVendor()) ? $product->getVendor()->getId() : '');
+            $this->addDataForResource($resource, 'Vendor_Name', !is_null($product->getVendor()) ? $product->getVendor()->getName() : '');
+            $this->addDataForResource($resource, 'Vendor_Email', !is_null($product->getVendor()) ? $product->getVendor()->getEmail() : '');
+
+        }
     }
 
     protected function findResources(array $idsToExport): array
@@ -191,5 +218,11 @@ class OrderResourcePlugin extends ResourcePlugin
     private function getOrder(OrderItemInterface $resource)
     {
         return $resource->getOrder();
+    }
+
+    private function isExist($class, $proxyObject)
+    {
+        $this->entityManager->detach($proxyObject);
+        return $this->entityManager->find($class, $proxyObject->getId()) != null;
     }
 }
