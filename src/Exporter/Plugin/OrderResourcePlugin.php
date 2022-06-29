@@ -119,7 +119,7 @@ class OrderResourcePlugin extends ResourcePlugin
         $order = $this->getOrder($resource);
 
         $this->addDataForResource($resource, 'Order_Total', $order->getTotal());
-        $this->addDataForResource($resource, 'Total_After_Discount', $order->getOrderPromotionTotal() < 0 ? $order->getOrderPromotionTotal() * -1 : $order->getOrderPromotionTotal());
+        $this->addDataForResource($resource, 'Total_After_Discount', $order->getOrderPromotionTotal() <0 ?$order->getOrderPromotionTotal()*-1 : $order->getOrderPromotionTotal());
         $this->addDataForResource($resource, 'Order_created_Date', $order->getCreatedAt());
         $this->addDataForResource($resource, 'Order_updated_Date', $order->getUpdatedAt());
         $this->addDataForResource($resource, 'Shipping_Total', $order->getAdjustmentsTotal());
