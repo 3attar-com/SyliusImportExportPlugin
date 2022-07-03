@@ -105,11 +105,14 @@ class OrderResourcePlugin extends ResourcePlugin
             $this->addDataForResource($resource, 'Promotion_Name', $order->getPromotions()->first()->getName());
             $this->addDataForResource($resource, 'Promotion_Description', $order->getPromotions()->first()->getDescription());
         }
-        try {
-            $this->addDataForResource($resource, 'Promotion_Coupon_ID', $order->getPromotionCoupon()->getId());
-            $this->addDataForResource($resource, 'Promotion_Coupon_Name', $order->getPromotionCoupon()->getCode());
-        } catch (EntityNotFoundException $ex) {
-            return;
+        
+        if ($promo !== null){
+            try {
+                $this->addDataForResource($resource, 'Promotion_Coupon_ID', $order->getPromotionCoupon()->getId());
+                $this->addDataForResource($resource, 'Promotion_Coupon_Name', $order->getPromotionCoupon()->getCode());
+            } catch (EntityNotFoundException $ex) {
+                return;
+            }
         }
     }
 
