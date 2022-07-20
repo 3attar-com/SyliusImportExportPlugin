@@ -1,3 +1,5 @@
+parameters:
+    app.order_export_time_limit: "%env(EXPORT_TIME_LIMIT)%"
 services:
     # Parameter Bag
     sylius.parameter_bag:
@@ -32,7 +34,7 @@ services:
         class: FriendsOfSylius\SyliusImportExportPlugin\Controller\ExportDataController
         arguments:
             - "@sylius.exporters_registry"
-            - "@sylius.resource_controller.request_configuration_factory"
+            - "@sylius.controller.order_request_configuration_factory"
             - "@sylius.resource_controller.resources_collection_provider"
             - "@sylius.repository.order"
             - "%sylius.resources%"
@@ -371,3 +373,12 @@ services:
             - "@sylius.locale_provider"
             - "@sylius.importer.metadata_validator"
             - ["Code", "Parent", "Locale", "Name", "Slug", "Description"]
+
+    sylius.controller.order_request_configuration_factory:
+        public: true
+        autowire: true
+        class: FriendsOfSylius\SyliusImportExportPlugin\Controller\OrderRequestConfigurationFactory
+        arguments: 
+            - "@sylius.resource_controller.parameters_parser"
+            - "%sylius.resource.settings%"
+        tags: ['controller.service_arguments']
