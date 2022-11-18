@@ -57,6 +57,8 @@ final class ProductResourcePlugin extends ResourcePlugin
 
         $this->addDataForResource($resource, 'Locale', $translation->getLocale());
         $this->addDataForResource($resource, 'Name', $translation->getName());
+        $this->addDataForResource($resource, 'Vendor_Name', !is_null($resource->getVendor()) ? $resource->getVendor()->getName() : '' );
+        $this->addDataForResource($resource, 'Quantity', $resource->getVariants()[0]->getOnHand());
         $this->addDataForResource($resource, 'Description', $translation->getDescription());
         $this->addDataForResource($resource, 'Short_description', $translation->getShortDescription());
         $this->addDataForResource($resource, 'Meta_description', $translation->getMetaDescription());
@@ -141,7 +143,7 @@ final class ProductResourcePlugin extends ResourcePlugin
                 continue;
             }
 
-            $this->addDataForResource($resource, 'Price', $channelPricing->getPrice());
+            $this->addDataForResource($resource, 'Price', $channelPricing->getPrice() / 100 );
         }
     }
 }
