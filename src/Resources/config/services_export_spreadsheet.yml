@@ -23,7 +23,7 @@ services:
         arguments:
             - "@sylius.exporter.spreadsheet_writer"
             - "@sylius.exporter.pluginpool.customers"
-            - ["Email", "Email_canonical", "First_name" , "Last_name" ,  "Birthday", "Gender", "Phone_number", "Subscribed_to_newsletter"]
+            - ["Email", "Email_canonical", "First_name" , "Last_name" ,  "Birthday", "Gender", "Phone_number", "Subscribed_to_newsletter" , "Enabled" , "Verified"]
             - "@sylius.exporters_transformer_pool"
         tags:
             - { name: sylius.exporter, type: sylius.customer, format: xlsx }
@@ -70,3 +70,17 @@ services:
         arguments:
             - [ "@sylius.exporter.plugin.resource.products" ]
             - [ 'Code', 'Locale', 'Name','Vendor_Name', 'Quantity','Description', 'Short_description', 'Meta_description', 'Meta_keywords', 'Main_taxon', 'Taxons', 'Channels', 'Enabled', 'Price' ]
+    
+    sylius.exporter.pluginpool.customers:
+        class: FriendsOfSylius\SyliusImportExportPlugin\Exporter\Plugin\PluginPool
+        arguments:
+            - [ "@sylius.exporter.plugin.resource.customers" ]
+            - [ "Email", "Email_canonical", "First_name" , "Last_name" ,  "Birthday", "Gender", "Phone_number", "Subscribed_to_newsletter"  , "Enabled" , "Verified" ]
+    
+    sylius.exporter.plugin.resource.customers:
+        class: FriendsOfSylius\SyliusImportExportPlugin\Exporter\Plugin\CustomerResourcePlugin
+        arguments:
+            - "@sylius.repository.customer"
+            - "@property_accessor"
+            - "@doctrine.orm.entity_manager"
+        
