@@ -61,9 +61,8 @@ class CustomerResourcePlugin extends ResourcePlugin
         }
     }
 
-    private function addCustomerData(CustomerInterface $resource): void
+    private function addCustomerData(CustomerInterface $customer): void
     {
-        $customer = $resource;
         try {
             $this->addDataForResource($resource, 'Gender', $customer->getGender());
             $this->addDataForResource($resource, 'First_name', $customer->getFirstName());
@@ -71,8 +70,11 @@ class CustomerResourcePlugin extends ResourcePlugin
             $this->addDataForResource($resource, 'Email', $customer->getEmail());
             $this->addDataForResource($resource, 'Phone_number', $customer->getPhoneNumber());
             if ($customer->getUser()) {
-                $this->addDataForResource($resource, 'Enabled', $customer->getUser()->isEnabled());
-                $this->addDataForResource($resource, 'Verified', $customer->getUser()->isVerified());
+                $this->addDataForResource($resource, 'Enabled', $customer->getUser()->isEnabled() ? 'Yes':'No' );
+                $this->addDataForResource($resource, 'Verified', $customer->getUser()->isVerified() ? 'Yes':'No' );
+            } else  {
+                $this->addDataForResource($resource, 'Enabled', 'No' );
+                $this->addDataForResource($resource, 'Verified', 'No');
             }
         } catch (EntityNotFoundException $ex) {
             return;
