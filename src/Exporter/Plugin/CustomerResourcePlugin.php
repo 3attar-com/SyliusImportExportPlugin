@@ -63,20 +63,19 @@ class CustomerResourcePlugin extends ResourcePlugin
 
     private function addCustomerData(CustomerInterface $resource): void
     {
-        $customer =$resource;
-        if ($customer->getUser()){
-            try {
-                $this->addDataForResource($resource, 'Gender', $customer->getGender());
-                $this->addDataForResource($resource, 'First_name', $customer->getFirstName());
-                $this->addDataForResource($resource, 'Last_name', $customer->getLastName());
-                $this->addDataForResource($resource, 'Email', $customer->getEmail());
-                $this->addDataForResource($resource, 'Phone_number', $customer->getPhoneNumber());
+        $customer = $resource;
+        try {
+            $this->addDataForResource($resource, 'Gender', $customer->getGender());
+            $this->addDataForResource($resource, 'First_name', $customer->getFirstName());
+            $this->addDataForResource($resource, 'Last_name', $customer->getLastName());
+            $this->addDataForResource($resource, 'Email', $customer->getEmail());
+            $this->addDataForResource($resource, 'Phone_number', $customer->getPhoneNumber());
+            if ($customer->getUser()) {
                 $this->addDataForResource($resource, 'Enabled', $customer->getUser()->isEnabled());
-                $this->addDataForResource($resource, 'Verified' , $customer->getUser()->isVerified());
-
-            } catch (EntityNotFoundException $ex) {
-                return;
+                $this->addDataForResource($resource, 'Verified', $customer->getUser()->isVerified());
             }
+        } catch (EntityNotFoundException $ex) {
+            return;
         }
 
     }
