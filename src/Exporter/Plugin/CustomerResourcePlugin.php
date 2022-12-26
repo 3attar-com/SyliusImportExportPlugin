@@ -71,9 +71,8 @@ class CustomerResourcePlugin extends ResourcePlugin
             $this->addDataForResource($resource, 'Last_name', $customer->getLastName());
             $this->addDataForResource($resource, 'Email', $customer->getEmail());
             $this->addDataForResource($resource, 'Phone_number', $customer->getPhoneNumber());
-            $this->addDataForResource($resource, 'Phone_number', $customer->getPhoneNumber());
             $this->addDataForResource($resource, 'Enabled', $customer->getUser()->isEnabled());
-            $this->addDataForResource($resource,'Verified' , $customer->getUser()->isVerified());
+            $this->addDataForResource($resource, 'Verified' , $customer->getUser()->isVerified());
 
         } catch (EntityNotFoundException $ex) {
             return;
