@@ -76,7 +76,7 @@ class OrderResourcePlugin extends ResourcePlugin
                 $this->addShippingAddressData($item, (string)$item->getId(), (string)$resource->getId());
 
                 // insert billingaddress to the specific field
-                $this->addBillingAddressData($item, (string)$item->getId(), (string)$resource->getId());
+//                $this->addBillingAddressData($item, (string)$item->getId(), (string)$resource->getId());
 
                 $this->addOrderItemData($item);
             }
@@ -105,7 +105,7 @@ class OrderResourcePlugin extends ResourcePlugin
             $this->addDataForResource($resource, 'Promotion_Name', $order->getPromotions()->first()->getName());
             $this->addDataForResource($resource, 'Promotion_Description', $order->getPromotions()->first()->getDescription());
         }
-        
+
         if ($promo !== null){
             try {
                 $this->addDataForResource($resource, 'Promotion_Coupon_ID', $order->getPromotionCoupon()->getId());
@@ -138,9 +138,9 @@ class OrderResourcePlugin extends ResourcePlugin
 
     private function addCustomerData(OrderItemInterface $resource, $id): void
     {
-        $order = $this->getOrder($resource);
-        $customer = $order->getCustomer();
         try {
+            $order = $this->getOrder($resource);
+            $customer = $order->getCustomer();
             $this->addDataForResource($resource, 'Gender', $customer->getGender());
             $this->addDataForResource($resource, 'Full_name', $customer->getFullName());
             $this->addDataForResource($resource, 'Telephone', $customer->getPhoneNumber());
@@ -155,7 +155,6 @@ class OrderResourcePlugin extends ResourcePlugin
     {
         $order = $this->getOrder($resource);
         $shippingAddress = $order->getShippingAddress();
-
         try {
             $shippingInfoString = $this->addressConcatenation->getString($shippingAddress);
             $this->addDataForResource($resource, 'provinceCode', $shippingAddress->getProvinceCode());
@@ -165,6 +164,12 @@ class OrderResourcePlugin extends ResourcePlugin
             $this->addDataForResource($resource, 'First_Name', $shippingAddress->getFirstName());
             $this->addDataForResource($resource, 'Last_Name', $shippingAddress->getLastName());
             $this->addDataForResource($resource, 'Phone_Number', $shippingAddress->getPhoneNumber());
+            $this->addDataForResource($resource, 'Email', $shippingAddress->getEmail());
+            $this->addDataForResource($resource, 'Latitude', $shippingAddress->getLatitude());
+            $this->addDataForResource($resource, 'Longitude', $shippingAddress->getLongitude());
+            $this->addDataForResource($resource, 'Title', $shippingAddress->getTitle());
+            $this->addDataForResource($resource, 'AddressName', $shippingAddress->getAddressName());
+            $this->addDataForResource($resource, 'ExtraData', $shippingAddress->getExtraData());
         } catch (EntityNotFoundException $ex) {
             return;
         }

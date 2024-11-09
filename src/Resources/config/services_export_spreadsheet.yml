@@ -33,18 +33,18 @@ services:
         arguments:
             - "@sylius.exporter.spreadsheet_writer"
             - "@sylius.exporter.pluginpool.orders"
-            - [ "Number", "State",  "Order_Total","Total_After_Discount",   "Currency_code",  "Order_created_Date" , "Order_updated_Date", "Payment_state", "Shipping_state", "Product" , "Item_Price", "Item_Quantity", "Item_Total", "Customer_Id", "Full_name", "Email", "Gender", "Telephone", "Vendor_Id" , "Vendor_Name" , "Vendor_Email" , "provinceCode", "provinceName","Address_Street" ,"Shipping_Total", "First_Name" ,"Last_Name"  , "Phone_Number", "Promotion_ID", "Promotion_Name","Promotion_Description", "Promotion_Coupon_ID","Promotion_Coupon_Name", "Checkout_completed_at", "Checkout_state", "Shipping_state", "Token_value",   "Shipping_address", "Billing_address" , "Customer_ip", "Notes" ]
+            - [ "Number", "State", "Order_Total", "Total_After_Discount", "Currency_code", "Order_created_Date" , "Order_updated_Date", "Payment_state", "Shipping_state", "Product", "Item_Price", "Item_Quantity", "Item_Total", "Customer_Id", "Full_name", "Email", "Gender", "Telephone", "Vendor_Id" , "Vendor_Name" , "Vendor_Email", "provinceCode", "provinceName", "Address_Street", "Shipping_Total", "First_Name", "Last_Name", "Phone_Number", "Promotion_ID", "Promotion_Name", "Promotion_Description", "Promotion_Coupon_ID", "Promotion_Coupon_Name", "Checkout_completed_at", "Checkout_state", "Token_value", "Shipping_address", "Customer_ip", "Notes", "Latitude", "Longitude", "Title", "AddressName", "ExtraData" ]
             - "@sylius.exporters_transformer_pool" # Optional
             - "@sylius.repository.order"
         tags:
             - { name: sylius.exporter, type: sylius.order, format: xlsx }
-        
+
     sylius.exporter.pluginpool.orders:
         class: FriendsOfSylius\SyliusImportExportPlugin\Exporter\Plugin\PluginPool
         arguments:
             - [ "@sylius.exporter.plugin.resource.orders" ]
-            - [ "Number", "State", "Order_Total" , "Total_After_Discount",   "Currency_code",  "Order_created_Date","Order_updated_Date", "Payment_state" ,"Shipping_state","Product" , "Item_Price", "Item_Quantity", "Item_Total", "Customer_Id",  "Full_name", "Email", "Gender",  "Telephone", "Vendor_Id" , "Vendor_Name" , "Vendor_Email","provinceCode", "provinceName","Address_Street" ,"Shipping_Total" , "First_Name","Last_Name" ,"Phone_Number", "Promotion_ID", "Promotion_Name","Promotion_Description", "Promotion_Coupon_ID","Promotion_Coupon_Name",  "Checkout_completed_at", "Checkout_state",  "Token_value",  "Shipping_address", "Billing_address" , "Customer_ip", "Notes" ]
-        
+            - [ "Number", "State", "Order_Total", "Total_After_Discount", "Currency_code", "Order_created_Date", "Order_updated_Date", "Payment_state", "Shipping_state", "Product", "Item_Price", "Item_Quantity", "Item_Total", "Customer_Id", "Full_name", "Email", "Gender", "Telephone", "Vendor_Id" , "Vendor_Name" , "Vendor_Email", "provinceCode", "provinceName", "Address_Street", "Shipping_Total", "First_Name", "Last_Name", "Phone_Number", "Promotion_ID", "Promotion_Name", "Promotion_Description", "Promotion_Coupon_ID", "Promotion_Coupon_Name", "Checkout_completed_at", "Checkout_state", "Token_value", "Shipping_address",  "Customer_ip", "Notes", "Latitude", "Longitude", "Title", "AddressName", "ExtraData" ]
+
     sylius.exporter.plugin.resource.orders:
         class: FriendsOfSylius\SyliusImportExportPlugin\Exporter\Plugin\OrderResourcePlugin
         arguments:
