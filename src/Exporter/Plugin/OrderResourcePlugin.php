@@ -61,8 +61,8 @@ class OrderResourcePlugin extends ResourcePlugin
         /** @var OrderInterface $resource */
         foreach ($this->resources as $resource) {
 
-            // insert general fields
             $items = $this->getItemsAndCount($resource);
+
             foreach ($items as $item) {
 
                 $this->addPromotionAndPromotionCouponerData($item, (string)$resource->getId());
@@ -141,12 +141,15 @@ class OrderResourcePlugin extends ResourcePlugin
         try {
             $order = $this->getOrder($resource);
             $customer = $order->getCustomer();
-            $this->addDataForResource($resource, 'Gender', $customer->getGender());
-            $this->addDataForResource($resource, 'Full_name', $customer->getFullName());
-            $this->addDataForResource($resource, 'Telephone', $customer->getPhoneNumber());
-            $this->addDataForResource($resource, 'Email', $customer->getEmail());
-            $this->addDataForResource($resource, 'Customer_Id', $customer->getId());
-        } catch (EntityNotFoundException $ex) {
+            if ($customer !== null) {
+                $this->addDataForResource($resource, 'Gender', $customer->getGender());
+                $this->addDataForResource($resource, 'Full_name', $customer->getFullName());
+                $this->addDataForResource($resource, 'Telephone', $customer->getPhoneNumber());
+                $this->addDataForResource($resource, 'Email', $customer->getEmail());
+                $this->addDataForResource($resource, 'Customer_Id', $customer->getId());
+            }
+
+        } catch (\Exception $ex) {
             return;
         }
     }
@@ -156,20 +159,23 @@ class OrderResourcePlugin extends ResourcePlugin
         $order = $this->getOrder($resource);
         $shippingAddress = $order->getShippingAddress();
         try {
-            $shippingInfoString = $this->addressConcatenation->getString($shippingAddress);
-            $this->addDataForResource($resource, 'provinceCode', $shippingAddress->getProvinceCode());
-            $this->addDataForResource($resource, 'provinceName', $shippingAddress->getProvinceName());
-            $this->addDataForResource($resource, 'Address_Street', $shippingAddress->getStreet());
-            $this->addDataForResource($resource, 'Shipping_address', $shippingInfoString);
-            $this->addDataForResource($resource, 'First_Name', $shippingAddress->getFirstName());
-            $this->addDataForResource($resource, 'Last_Name', $shippingAddress->getLastName());
-            $this->addDataForResource($resource, 'Phone_Number', $shippingAddress->getPhoneNumber());
-            $this->addDataForResource($resource, 'Email', $shippingAddress->getEmail());
-            $this->addDataForResource($resource, 'Latitude', $shippingAddress->getLatitude());
-            $this->addDataForResource($resource, 'Longitude', $shippingAddress->getLongitude());
-            $this->addDataForResource($resource, 'Title', $shippingAddress->getTitle());
-            $this->addDataForResource($resource, 'AddressName', $shippingAddress->getAddressName());
-            $this->addDataForResource($resource, 'ExtraData', $shippingAddress->getExtraData());
+            if ($shippingAddress !== null) {
+                $shippingInfoString = $this->addressConcatenation->getString($shippingAddress);
+                $this->addDataForResource($resource, 'provinceCode', $shippingAddress->getProvinceCode());
+                $this->addDataForResource($resource, 'provinceName', $shippingAddress->getProvinceName());
+                $this->addDataForResource($resource, 'Address_Street', $shippingAddress->getStreet());
+                $this->addDataForResource($resource, 'Shipping_address', $shippingInfoString);
+                $this->addDataForResource($resource, 'First_Name', $shippingAddress->getFirstName());
+                $this->addDataForResource($resource, 'Last_Name', $shippingAddress->getLastName());
+                $this->addDataForResource($resource, 'Phone_Number', $shippingAddress->getPhoneNumber());
+                $this->addDataForResource($resource, 'Email', $shippingAddress->getEmail());
+                $this->addDataForResource($resource, 'Latitude', $shippingAddress->getLatitude());
+                $this->addDataForResource($resource, 'Longitude', $shippingAddress->getLongitude());
+                $this->addDataForResource($resource, 'Title', $shippingAddress->getTitle());
+                $this->addDataForResource($resource, 'AddressName', $shippingAddress->getAddressName());
+                $this->addDataForResource($resource, 'ExtraData', $shippingAddress->getExtraData());
+            }
+
         } catch (EntityNotFoundException $ex) {
             return;
         }
@@ -181,8 +187,10 @@ class OrderResourcePlugin extends ResourcePlugin
         $billingAddress = $order->getBillingAddress();
 
         try {
-            $billingInfoString = $this->addressConcatenation->getString($billingAddress);
-            $this->addDataForResource($resource, 'Billing_address', $billingInfoString);
+            if ($billingAddress !== null) {
+                $billingInfoString = $this->addressConcatenation->getString($billingAddress);
+                $this->addDataForResource($resource, 'Billing_address', $billingInfoString);
+            }
         } catch (EntityNotFoundException $ex) {
             return;
         }
@@ -204,13 +212,15 @@ class OrderResourcePlugin extends ResourcePlugin
         $variant = $resource->getVariant();
         $product = $variant->getProduct();
         try {
-            $this->addDataForResource($resource, 'Item_Total', $resource->getTotal());
-            $this->addDataForResource($resource, 'Item_Price', $resource->getUnitPrice());
-            $this->addDataForResource($resource, 'Item_Quantity', $resource->getQuantity());
-            $this->addDataForResource($resource, 'Product', $resource->getProductName());
-            $this->addDataForResource($resource, 'Vendor_Id', !is_null($product->getVendor()) ? $product->getVendor()->getId() : '');
-            $this->addDataForResource($resource, 'Vendor_Name', !is_null($product->getVendor()) ? $product->getVendor()->getName() : '');
-            $this->addDataForResource($resource, 'Vendor_Email', !is_null($product->getVendor()) ? $product->getVendor()->getEmail() : '');
+            if ($product !== null) {
+                $this->addDataForResource($resource, 'Item_Total', $resource->getTotal());
+                $this->addDataForResource($resource, 'Item_Price', $resource->getUnitPrice());
+                $this->addDataForResource($resource, 'Item_Quantity', $resource->getQuantity());
+                $this->addDataForResource($resource, 'Product', $resource->getProductName());
+                $this->addDataForResource($resource, 'Vendor_Id', !is_null($product->getVendor()) ? $product->getVendor()->getId() : '');
+                $this->addDataForResource($resource, 'Vendor_Name', !is_null($product->getVendor()) ? $product->getVendor()->getName() : '');
+                $this->addDataForResource($resource, 'Vendor_Email', !is_null($product->getVendor()) ? $product->getVendor()->getEmail() : '');
+            }
 
         } catch (EntityNotFoundException $ex) {
             return;
